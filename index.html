@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>For Pogi</title>
+    <style>
+      body {
+        margin: 0;
+        background-image: url("https://i.pinimg.com/originals/b1/74/ed/b174eda8550c9ef8ae3d2ba420726767.gif");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        color: #fff;
+        font-family: "Quicksand", sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        overflow: hidden;
+      }
+      #game-area {
+        width: 100%;
+        max-width: 450px;
+        height: 100vh;
+        position: relative;
+        background: rgba(0, 0, 0, 0.5);
+        touch-action: manipulation;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+      }
+      .item {
+        position: absolute;
+        font-size: 40px;
+        cursor: pointer;
+        user-select: none;
+        transition: transform 0.2s;
+      }
+      .item:active {
+        transform: scale(0.6);
+      }
+      #ui {
+        position: absolute;
+        top: 20px;
+        width: 100%;
+        text-align: center;
+        z-index: 5;
+        font-weight: bold;
+        color: #ffcccc;
+      }
+      #overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+      }
+      #letter-container {
+        width: 85%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      #letter-content {
+        font-size: 19px;
+        line-height: 1.6;
+        max-height: 60vh;
+        overflow-y: auto;
+        padding: 20px;
+        text-align: center;
+        animation: cutePop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+      @keyframes cutePop {
+        from {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      button {
+        padding: 15px 35px;
+        font-size: 17px;
+        background: #ff85a2;
+        color: white;
+        border: none;
+        border-radius: 30px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: 0.3s;
+      }
+      button:hover {
+        background: #ff5c85;
+        transform: scale(1.05);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Audio element for background music -->
+    <audio id="bg-music" loop>
+      <source
+        src="Hindi Ako Mawawala (c) El Manu [stripped] Official Lyric Video.mp3"
+        type="audio/mpeg"
+      />
+    </audio>
+
+    <div id="game-area">
+      <div id="ui">Score: <span id="score">0</span></div>
+      <div id="overlay">
+        <div id="letter-container">
+          <div id="letter-content"></div>
+          <button id="action-btn" onclick="handleAction()">Next</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let score = 0,
+        page = 0,
+        gameActive = true;
+
+      function createItem() {
+        if (!gameActive) return;
+        const gameArea = document.getElementById("game-area");
+        const item = document.createElement("div");
+        item.className = "item";
+        const items = ["🕷️", "🕸️", "💣"];
+        const type = items[Math.floor(Math.random() * items.length)];
+        item.innerHTML = type;
+        item.style.left = Math.random() * (gameArea.clientWidth - 50) + "px";
+        item.style.top = "-50px";
+        gameArea.appendChild(item);
+
+        let pos = -50,
+          fall = setInterval(() => {
+            pos += 3;
+            item.style.top = pos + "px";
+            if (pos > gameArea.clientHeight) {
+              clearInterval(fall);
+              item.remove();
+            }
+          }, 20);
+
+        item.onpointerdown = (e) => {
+          e.preventDefault();
+          if (type === "💣") {
+            endGame(false);
+          } else {
+            score++;
+            document.getElementById("score").innerText = score;
+            item.remove();
+            clearInterval(fall);
+            if (score >= 10) endGame(true);
+          }
+        };
+      }
+
+      function endGame(won) {
+        gameActive = false;
+        document.getElementById("overlay").style.display = "flex";
+        if (won) {
+          updatePage();
+        } else {
+          document.getElementById("letter-content").innerText =
+            "Aw, you lost :( That's okay, try again!";
+          document.getElementById("action-btn").innerText = "Try Again";
+        }
+      }
+
+      function updatePage() {
+        const content = document.getElementById("letter-content");
+        const btn = document.getElementById("action-btn");
+        const pages = [
+          "Hi Bebi:) I made this web for you..",
+          "We've been together for 365 days.",
+          "I'm very glad and thankful that I met you and that I confessed this day.",
+          "I hope the universe is kind enough for me to keep you, I love you so muchie.",
+          "Final",
+        ];
+
+        if (page < 4) {
+          content.innerText = pages[page];
+          btn.innerText = "Next";
+        } else if (page === 4) {
+          content.innerHTML = "Click to see my message for you... (volume up!)";
+          btn.innerHTML = "Reveal Letter";
+        } else {
+          // Play music here when revealed
+          const music = document.getElementById("bg-music");
+          music
+            .play()
+            .catch((e) => console.log("Audio playback requires interaction"));
+
+          content.innerHTML = `Hello bebi, today is December 5 and it means it's been a year since I confessed to you:) Thank you for accepting me for who I am and for what I was. You have made me so comfy that when I share my troubles with you I feel like a weight has been lifted off of me.<br><br>I still remember how I was so set on confessing to you by giving you the letters but a lot of people told me not to do it because you should be the one confessing (not even sure if you liked me back then lol) but I'm glad I didn't listen to them. Admiring you was the softest, lightest, and peaceful I've ever felt. You bring peace in the middle of the chaos that I am in.<br><br>Thank you for not judging me. You make me feel like I'm still a belonging human in a society that only knows how to judge. We might have days that we don't talk or we make tampo but still at the end of the day I'm still here:D<br><br>I won't get tired of saying that no matter how many guys try to talk to me, you're the only one I want to talk to. I love everything about you and every flaw you think you have. I LOVE YOU SO MUCHIE MY BEBIII, you'll always have a special place in my head and heart. More hugs n kisses in the future oki?<br><br>I'm ending this letter here, I love you pogi.<br><br>lablab,<br>Your Chinese.`;
+          btn.innerText = "Close";
+          btn.onclick = () => location.reload();
+        }
+      }
+
+      function handleAction() {
+        if (document.getElementById("action-btn").innerText === "Try Again")
+          location.reload();
+        else {
+          page++;
+          updatePage();
+        }
+      }
+
+      setInterval(createItem, 800);
+    </script>
+  </body>
+</html>
